@@ -609,6 +609,17 @@
     .submitted .processing-box{display:grid;}
   }
 
+  /* ===== 背景音樂開關 ===== */
+  .bgm-btn{position:fixed;top:12px;left:12px;z-index:90;width:44px;height:44px;border-radius:50%;
+    display:grid;place-items:center;cursor:pointer;padding:0;line-height:1;
+    border:2px solid rgba(71,193,230,.75);background:rgba(0,20,30,.6);color:#67d8ff;
+    font-size:20px;font-family:Arial,sans-serif;
+    box-shadow:0 0 0 2px rgba(16,64,76,.8),0 0 10px rgba(71,193,230,.35);
+    transition:color .15s,border-color .15s,box-shadow .15s;}
+  .bgm-btn:hover{filter:brightness(1.15);}
+  .bgm-btn.playing{color:#ff9a16;border-color:rgba(240,147,20,.85);
+    box-shadow:0 0 0 2px rgba(94,43,4,.85),0 0 12px rgba(255,154,22,.55);}
+
 </style>
 </head>
 <body>
@@ -696,6 +707,8 @@
       </div>
     </form>
 
+    <audio id="bgm" loop preload="auto" src="locomotion_neon-genesis-evangelion-decisive-battle.mp3"></audio>
+    <button class="bgm-btn" id="bgmBtn" type="button" title="背景音樂 開/關" aria-label="背景音樂">&#9834;</button>
     <div class="scanline"></div>
     <div class="vignette"></div>
   </main>
@@ -750,6 +763,26 @@
       window.setTimeout(() => stage.classList.remove('submitted'), 900);
     }, 3000);
   });
+
+  // ===== 背景音樂控制 =====
+  (function(){
+    const bgm = document.getElementById('bgm');
+    const bgmBtn = document.getElementById('bgmBtn');
+    if(!bgm || !bgmBtn) return;
+    bgm.volume = 0.45;
+    let playing = false;
+    function apply(on){
+      if(on){
+        bgm.play().then(function(){ playing = true; bgmBtn.classList.add('playing'); }).catch(function(){});
+      } else {
+        bgm.pause(); playing = false; bgmBtn.classList.remove('playing');
+      }
+    }
+    bgmBtn.addEventListener('click', function(e){ e.stopPropagation(); apply(!playing); });
+    function firstStart(){ if(!playing) apply(true); document.removeEventListener('click', firstStart); }
+    document.addEventListener('click', firstStart);
+    window.addEventListener('load', function(){ apply(true); });
+  })();
 </script>
 </body>
 </html>
