@@ -550,6 +550,65 @@
     .submit-btn{width:112px;min-height:34px;font-size:14px;}
     .panel select{height:22px;font-size:10px;width:min(64%, 210px);}
   }
+
+  /* ===== 手機直式 (portrait) 自適應排版 ===== */
+  @media (max-width:600px){
+    html,body{height:auto;}
+    body{padding:0;display:block;}
+    .magi-stage{
+      width:100vw;max-width:100vw;
+      aspect-ratio:auto;height:auto;min-height:100vh;
+      display:flex;flex-flow:row wrap;align-content:flex-start;
+      gap:10px;padding:14px 12px 20px;border:0;overflow:visible;
+    }
+    .magi-stage::before,.connectors,.scanline,.stripe{display:none;}
+
+    .top-block{position:static;width:50%;height:auto;top:auto;left:auto!important;right:auto!important;}
+    .top-block.left{order:1;} .top-block.right{order:2;}
+    .kanji{position:static;top:auto;width:100%;padding-left:0;margin:0;
+      font-size:clamp(34px,13vw,60px);letter-spacing:.1em;text-align:center;}
+
+    .system-info{position:static;order:3;width:64%;left:auto;top:auto;}
+    .system-info .code{font-size:clamp(20px,6.4vw,30px);margin-bottom:.3rem;}
+    .system-info .meta{margin-left:1.4rem;font-size:clamp(10px,3vw,13px);line-height:1.3;}
+    .info-btn{position:static;order:4;width:32%;height:auto;top:auto;right:auto;
+      aspect-ratio:5/3;max-height:70px;align-self:center;margin-left:auto;
+      font-size:clamp(22px,8vw,36px);}
+
+    .center-magi{position:static;order:5;width:100%;height:auto;left:auto;top:auto;
+      background:transparent;padding:4px 0 0;font-size:clamp(26px,9vw,40px);}
+
+    .panel{position:static;width:100%;height:auto;left:auto!important;right:auto!important;top:auto;
+      clip-path:none!important;min-height:100px;padding:14px 16px;
+      display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;}
+    .balthasar{order:6;} .casper{order:7;} .melchior{order:8;}
+    .panel-inner{position:static;inset:auto;justify-content:flex-start;text-align:left;
+      font-size:clamp(26px,8vw,40px);padding:0!important;}
+    .panel .llm-label{position:static;left:auto;top:auto;font-size:clamp(11px,3.4vw,15px);opacity:.85;}
+    .panel select{position:static;left:auto;transform:none;bottom:auto;
+      width:100%;max-width:320px;height:34px;font-size:13px;opacity:.95;}
+    .balthasar select{bottom:auto;}
+    .panel .status{position:static;left:auto;right:auto;bottom:auto;text-align:left;
+      font-size:clamp(13px,4vw,18px);}
+    .balthasar .status{bottom:auto;}
+
+    .summary{position:static;order:9;width:100%;left:auto;right:auto;bottom:auto;min-height:0;
+      font-size:clamp(12px,3.6vw,16px);}
+    .formbar{position:static;order:10;width:100%;left:auto;right:auto;bottom:auto;height:auto;
+      padding:4px 0 0;margin-top:2px;}
+    .field-row{grid-template-columns:auto 1fr;column-gap:8px;height:auto;margin:0 0 8px;align-items:center;
+      font-size:clamp(12px,3.6vw,16px);}
+    .field-row span{display:none;}
+    .field-row input{height:40px;font-size:clamp(13px,3.8vw,16px);}
+    .submit-btn{grid-column:1 / -1;width:100%;height:44px;min-height:44px;transform:none;justify-self:stretch;
+      margin-top:2px;font-size:clamp(15px,4.2vw,19px);}
+
+    .processing-box{position:fixed;top:42%;left:50%;transform:translateX(-50%);
+      width:auto;min-width:200px;height:auto;padding:10px 22px;z-index:60;
+      font-size:clamp(22px,7vw,32px);}
+    .submitted .processing-box{display:grid;}
+  }
+
 </style>
 </head>
 <body>
