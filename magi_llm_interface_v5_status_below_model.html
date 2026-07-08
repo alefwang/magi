@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MAGI SYS - LLM Tri-Query Console</title>
+<style>
+  :root{
+    --bg:#000;
+    --orange:#d97811;
+    --orange2:#ff9a16;
+    --cyan:#49b8d7;
+    --cyan2:#67d8f5;
+    --teal:#0c513f;
+    --teal2:#168060;
+    --red:#d81616;
+    --yellow:#e8cb2a;
+  }
+
+  *{box-sizing:border-box}
+
+  html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:#000;
+    color:var(--orange);
+    font-family:"Courier New","Noto Sans Mono","Consolas",monospace;
+    overflow-x:hidden;
+  }
+
+  body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:14px;
+  }
+
+  .magi-stage{
+    width:min(100vw - 28px, 1550px);
+    aspect-ratio:16/9;
+    min-height:560px;
+    position:relative;
+    background:#000;
+    border:3px solid rgba(219,122,18,.72);
+    box-shadow:
+      inset 0 0 0 2px rgba(87,45,15,.7),
+      0 0 0 1px rgba(255,151,25,.35);
+    overflow:hidden;
+  }
+
+  .magi-stage::before{
+    content:"";
+    position:absolute;
+    inset:2.3%;
+    border:2px solid rgba(210,117,17,.58);
+    pointer-events:none;
+  }
+
+  .top-block{
+    position:absolute;
+    top:5.7%;
+    width:32.7%;
+    height:17%;
+  }
+
+  .top-block.left{left:1.7%}
+  .top-block.right{right:1.7%}
+
+  .kanji{
+    position:absolute;
+    top:26%;
+    width:100%;
+    text-align:center;
+    letter-spacing:.23em;
+    padding-left:.23em;
+    font-family:"Noto Serif CJK TC","Noto Serif TC","Yu Mincho","SimSun",serif;
+    font-size:clamp(42px,5.75vw,88px);
+    font-weight:900;
+    line-height:.95;
+    color:#ff9412;
+    text-shadow:
+      0 0 2px #ff9412,
+      3px 3px 0 rgba(84,39,0,.8);
+  }
+
+  .kanji-sub{
+    display:none;
+    margin-top:.12em;
+    font-family:"Courier New",monospace;
+    font-size:.16em;
+    letter-spacing:.08em;
+    color:#ffd442;
+    text-shadow:none;
+  }
+
+  .stripe{
+    position:absolute;
+    left:0;
+    right:0;
+    height:3.8%;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(12,92,67,.95) 0 2px,
+        rgba(10,43,33,.95) 2px 5px,
+        transparent 5px 7px
+      );
+    border-top:1px solid rgba(30,128,92,.75);
+    border-bottom:1px solid rgba(30,128,92,.75);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.8),
+      0 0 5px rgba(22,116,86,.45);
+  }
+
+  .stripe.top{top:0}
+  .stripe.bottom{bottom:0}
+
+  .system-info{
+    position:absolute;
+    left:3.1%;
+    top:23.8%;
+    color:#ff9516;
+    font-weight:700;
+    text-shadow:1px 1px 0 rgba(84,39,0,.7);
+  }
+
+  .system-info .code{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(22px,2.75vw,42px);
+    font-weight:600;
+    letter-spacing:.04em;
+    margin-bottom:.45rem;
+  }
+
+  .system-info .meta{
+    margin-left:3.7rem;
+    font-size:clamp(10px,1.15vw,18px);
+    line-height:1.0;
+    letter-spacing:.055em;
+  }
+
+  .info-btn{
+    position:absolute;
+    top:30.1%;
+    right:3.1%;
+    width:11.6%;
+    height:11.7%;
+    display:grid;
+    place-items:center;
+    border:3px solid rgba(71,193,230,.65);
+    color:#67d8ff;
+    background:rgba(0,22,32,.35);
+    font-size:clamp(24px,3.05vw,48px);
+    font-family:"Noto Serif CJK TC","Noto Serif TC","Yu Mincho","SimSun",serif;
+    font-weight:900;
+    letter-spacing:.12em;
+    padding-left:.12em;
+    box-shadow:
+      inset 0 0 0 3px rgba(44,119,142,.45),
+      0 0 0 2px rgba(16,64,76,.8);
+    cursor:pointer;
+  }
+
+  .connectors{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  .connector{
+    position:absolute;
+    background:var(--orange2);
+    box-shadow:0 0 0 2px rgba(100,47,0,.75);
+    transform-origin:center;
+  }
+
+  .conn-left{
+    width:18.6%;
+    height:1.75%;
+    left:34.0%;
+    top:55.1%;
+    transform:rotate(-54deg);
+  }
+
+  .conn-right{
+    width:18.6%;
+    height:1.75%;
+    left:47.4%;
+    top:55.1%;
+    transform:rotate(54deg);
+  }
+
+  .conn-bottom{
+    width:20.2%;
+    height:1.8%;
+    left:39.9%;
+    top:70.8%;
+  }
+
+  .center-magi{
+    position:absolute;
+    left:44.05%;
+    top:58.2%;
+    width:11.9%;
+    height:7.2%;
+    z-index:4;
+    display:grid;
+    place-items:center;
+    background:#000;
+    color:#ff9915;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(28px,3.55vw,55px);
+    font-weight:900;
+    letter-spacing:.03em;
+    text-shadow:0 0 2px rgba(255,153,21,.7);
+  }
+
+  .panel{
+    position:absolute;
+    background:var(--cyan);
+    border:3px solid rgba(201,117,16,.85);
+    z-index:2;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.08),
+      0 0 0 1px rgba(0,0,0,.75);
+    transition:background-color .12s linear, filter .12s linear;
+  }
+
+  .panel-inner{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#030405;
+    font-family:Arial,Helvetica,sans-serif;
+    font-weight:900;
+    font-size:clamp(28px,3.45vw,58px);
+    letter-spacing:.02em;
+    text-align:center;
+    white-space:nowrap;
+    user-select:none;
+  }
+
+  .panel .llm-label{
+    position:absolute;
+    left:4.5%;
+    top:5.5%;
+    color:#001116;
+    font-size:clamp(11px,1.05vw,18px);
+    font-weight:900;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    opacity:.78;
+  }
+
+  .panel select{
+    position:absolute;
+    left:50%;
+    right:auto;
+    bottom:17.5%;
+    transform:translateX(-50%);
+    width:min(58%, 260px);
+    height:26px;
+    background:#081015;
+    color:#74daf6;
+    border:1px solid #173d47;
+    font-size:12px;
+    font-family:"Courier New",monospace;
+    text-align:center;
+    text-align-last:center;
+    outline:none;
+    opacity:.92;
+    z-index:5;
+  }
+
+  .balthasar select{
+    bottom:20.5%;
+  }
+
+  .panel .status{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:7.0%;
+    z-index:6;
+    text-align:center;
+    color:#050505;
+    font-family:"Courier New",monospace;
+    font-weight:900;
+    font-size:clamp(13px,1.35vw,22px);
+    letter-spacing:.11em;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .balthasar .status{
+    bottom:10.2%;
+  }
+
+  .panel.status-visible .status{opacity:1}
+  .panel.approved .status::before{content:"APPROVED"}
+  .panel.rejected .status::before{content:"REJECTED"}
+
+  .balthasar{
+    left:34.1%;
+    top:5.7%;
+    width:31.7%;
+    height:50.7%;
+    clip-path:polygon(0 0,100% 0,100% 80.5%,75.2% 100%,24.8% 100%,0 80.5%);
+  }
+
+  .casper{
+    left:1.8%;
+    top:46.2%;
+    width:40.4%;
+    height:40.3%;
+    clip-path:polygon(0 0,73.7% 0,100% 41.1%,100% 100%,0 100%);
+  }
+
+  .melchior{
+    right:1.8%;
+    top:46.2%;
+    width:40.4%;
+    height:40.3%;
+    clip-path:polygon(26.3% 0,100% 0,100% 100%,0 100%,0 41.1%);
+  }
+
+  .balthasar .panel-inner{padding:8.3% 5% 0}
+  .casper .panel-inner{padding:2% 8% 0 4%}
+  .melchior .panel-inner{padding:2% 4% 0 8%}
+
+  .processing-box{
+    position:absolute;
+    top:18.5%;
+    left:50%;
+    transform:translateX(-50%);
+    min-width:27%;
+    height:8.4%;
+    display:none;
+    place-items:center;
+    z-index:7;
+    border:3px solid rgba(232,203,42,.95);
+    color:#ffe052;
+    background:#000;
+    font-family:"Noto Serif CJK TC","Noto Serif TC","Courier New",monospace;
+    font-size:clamp(21px,2.45vw,39px);
+    font-weight:900;
+    letter-spacing:.1em;
+    box-shadow:inset 0 0 0 2px rgba(120,101,9,.75);
+  }
+
+  .processing-box span{
+    display:block;
+    font-size:.35em;
+    font-family:"Courier New",monospace;
+    letter-spacing:.16em;
+    margin-top:-.14em;
+    text-align:center;
+  }
+
+  .formbar{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:1.15%;
+    height:9.0%;
+    padding:0 1.35%;
+    z-index:10;
+    font-family:"Courier New",monospace;
+  }
+
+  .field-row{
+    height:43%;
+    display:grid;
+    grid-template-columns:10.2% 1fr auto;
+    column-gap:.55%;
+    align-items:center;
+    color:#e9971d;
+    font-size:clamp(13px,1.2vw,20px);
+    font-weight:700;
+  }
+
+  .field-row:first-child{margin-bottom:.35%}
+
+  .field-row label{
+    white-space:nowrap;
+    text-transform:lowercase;
+    text-shadow:1px 1px rgba(85,41,0,.7);
+  }
+
+  .field-row input{
+    width:100%;
+    height:76%;
+    background:#100702;
+    color:#ffbf44;
+    border:2px solid rgba(207,116,18,.8);
+    box-shadow:inset 0 0 0 1px rgba(84,39,0,.8);
+    font-family:"Courier New",monospace;
+    font-size:clamp(13px,1.1vw,19px);
+    padding:0 .7rem;
+    outline:none;
+  }
+
+  .field-row input::placeholder{color:rgba(255,180,53,.55)}
+
+  .submit-btn{
+    height:76%;
+    width:110px;
+    border:2px solid rgba(207,116,18,.9);
+    background:#050200;
+    color:#ff9a16;
+    font-family:"Noto Serif CJK TC","Noto Serif TC","Courier New",monospace;
+    font-size:clamp(13px,1.1vw,18px);
+    font-weight:900;
+    cursor:pointer;
+  }
+
+  .submit-btn:hover,.info-btn:hover{
+    filter:brightness(1.18);
+  }
+
+  .summary{
+    position:absolute;
+    left:23.5%;
+    right:23.5%;
+    bottom:12.0%;
+    min-height:9.2%;
+    display:none;
+    z-index:8;
+    border:2px solid rgba(207,116,18,.92);
+    background:rgba(0,0,0,.86);
+    color:#ffbd4f;
+    padding:.75rem 1rem;
+    font-size:clamp(12px,1.1vw,18px);
+    line-height:1.35;
+    box-shadow:inset 0 0 0 1px rgba(92,46,8,.75);
+  }
+
+  .summary strong{color:#ffe052}
+
+  .scanline{
+    position:absolute;
+    inset:0;
+    z-index:20;
+    pointer-events:none;
+    opacity:.12;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.05) 0 1px,
+      transparent 1px 4px
+    );
+    mix-blend-mode:screen;
+  }
+
+  .vignette{
+    position:absolute;
+    inset:0;
+    z-index:19;
+    pointer-events:none;
+    box-shadow:inset 0 0 70px rgba(0,0,0,.85);
+  }
+
+  .submitted .top-block.left .kanji-main{display:none}
+  .submitted .top-block.right .kanji-main{display:none}
+  .submitted .top-block.left .kanji::before{content:"提訴";}
+  .submitted .top-block.right .kanji::before{content:"決議";}
+  .submitted .kanji-sub{display:block}
+  .submitted .processing-box{display:grid}
+
+  .panel.flashing{
+    animation:magiFlash .34s infinite steps(1,end);
+  }
+  .panel.flashing.alt1{animation-duration:.29s}
+  .panel.flashing.alt2{animation-duration:.41s}
+  .panel.flashing.alt3{animation-duration:.23s}
+
+  @keyframes magiFlash{
+    0%{background:var(--cyan); filter:brightness(1)}
+    33%{background:var(--red); filter:brightness(1.35)}
+    66%{background:#750505; filter:brightness(.85)}
+    100%{background:var(--cyan); filter:brightness(1)}
+  }
+
+  .panel.approved{
+    background:var(--cyan);
+  }
+  .panel.rejected{
+    background:var(--red);
+    filter:brightness(1.15);
+  }
+
+  .panel.rejected .panel-inner::after,
+  .panel.approved .panel-inner::after{
+    content:"";
+    display:none;
+  }
+
+
+  @media (max-width:1200px){
+    .panel-inner{
+      font-size:clamp(24px,3.15vw,44px);
+      letter-spacing:0;
+    }
+    .kanji{
+      font-size:clamp(36px,5.2vw,68px);
+      letter-spacing:.16em;
+      padding-left:.16em;
+    }
+    .center-magi{
+      font-size:clamp(24px,3.2vw,43px);
+    }
+  }
+
+  @media (max-width:900px){
+    body{padding:0}
+    .magi-stage{
+      width:100vw;
+      min-height:auto;
+      border-left:0;
+      border-right:0;
+    }
+    .system-info .meta{margin-left:2.2rem}
+    .field-row{grid-template-columns:16% 1fr auto}
+    .submit-btn{width:80px}
+    .panel select{height:22px;font-size:10px;width:min(64%, 210px);}
+  }
+</style>
+</head>
+<body>
+  <main class="magi-stage" id="stage" aria-label="MAGI tri-LLM interface">
+    <section class="top-block left">
+      <div class="stripe top"></div>
+      <div class="kanji"><span class="kanji-main">質問</span><span class="kanji-sub">SUBMITTED</span></div>
+      <div class="stripe bottom"></div>
+    </section>
+
+    <section class="top-block right">
+      <div class="stripe top"></div>
+      <div class="kanji"><span class="kanji-main">解決</span><span class="kanji-sub">RESOLVING</span></div>
+      <div class="stripe bottom"></div>
+    </section>
+
+    <aside class="system-info" aria-label="system information">
+      <div class="code">CODE：473</div>
+      <div class="meta">
+        FILE：MAGI_SYS<br>
+        EXTENTION：3023<br>
+        EX_MODE：OFF<br>
+        PRIORITY：AAA
+      </div>
+    </aside>
+
+    <button class="info-btn" type="button">情報</button>
+
+    <div class="processing-box" id="processingBox">審議中<span>PROCESSING</span></div>
+
+    <div class="connectors" aria-hidden="true">
+      <div class="connector conn-left"></div>
+      <div class="connector conn-right"></div>
+      <div class="connector conn-bottom"></div>
+    </div>
+
+    <div class="center-magi">MAGI</div>
+
+    <section class="panel balthasar" data-unit="ChatGPT">
+      <span class="llm-label">ChatGPT</span>
+      <div class="panel-inner">BALTHASAR・2</div>
+      <select aria-label="ChatGPT model">
+        <option>GPT-5.5 Thinking</option>
+        <option>GPT-5.5</option>
+        <option>GPT-5.2</option>
+        <option>o3</option>
+      </select>
+      <div class="status"></div>
+    </section>
+
+    <section class="panel casper" data-unit="Gemini">
+      <span class="llm-label">Gemini</span>
+      <div class="panel-inner">CASPER・3</div>
+      <select aria-label="Gemini model">
+        <option>Gemini 2.5 Pro</option>
+        <option>Gemini 2.5 Flash</option>
+        <option>Gemini 1.5 Pro</option>
+      </select>
+      <div class="status"></div>
+    </section>
+
+    <section class="panel melchior" data-unit="Claude">
+      <span class="llm-label">Claude</span>
+      <div class="panel-inner">MELCHIOR・1</div>
+      <select aria-label="Claude model">
+        <option>Claude Sonnet 4.5</option>
+        <option>Claude Opus 4.1</option>
+        <option>Claude Haiku 3.5</option>
+      </select>
+      <div class="status"></div>
+    </section>
+
+    <section class="summary" id="summary" aria-live="polite"></section>
+
+    <form class="formbar" id="magiForm">
+      <div class="field-row">
+        <label for="accessCode">access code:</label>
+        <input id="accessCode" name="accessCode" type="password" value="MAGI-473-AAA" />
+        <span></span>
+      </div>
+      <div class="field-row">
+        <label for="question">question:</label>
+        <input id="question" name="question" type="text" value="Should one follow emotions instead of logic?" />
+        <button class="submit-btn" type="submit">送出</button>
+      </div>
+    </form>
+
+    <div class="scanline"></div>
+    <div class="vignette"></div>
+  </main>
+
+<script>
+  const form = document.getElementById('magiForm');
+  const stage = document.getElementById('stage');
+  const panels = [...document.querySelectorAll('.panel')];
+  const summary = document.getElementById('summary');
+
+  const rejectionOrder = ['casper','melchior','balthasar'];
+  let runCount = 0;
+
+  function clearResult(){
+    panels.forEach(p => {
+      p.classList.remove('flashing','alt1','alt2','alt3','approved','rejected','status-visible');
+    });
+    summary.style.display = 'none';
+    summary.innerHTML = '';
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    clearResult();
+
+    const question = document.getElementById('question').value.trim() || 'No question provided.';
+    stage.classList.add('submitted');
+    panels.forEach((p, i) => {
+      p.classList.add('flashing', ['alt1','alt2','alt3'][i]);
+    });
+
+    window.setTimeout(() => {
+      panels.forEach(p => p.classList.remove('flashing','alt1','alt2','alt3'));
+
+      const rejectedClass = rejectionOrder[runCount % rejectionOrder.length];
+      runCount++;
+
+      panels.forEach(p => {
+        const isRejected = p.classList.contains(rejectedClass);
+        p.classList.add(isRejected ? 'rejected' : 'approved', 'status-visible');
+      });
+
+      const rejectedPanel = document.querySelector('.panel.rejected');
+      const rejectedName = rejectedPanel ? rejectedPanel.dataset.unit : 'UNKNOWN';
+
+      summary.style.display = 'block';
+      summary.innerHTML =
+        '<strong>SUMMARY：</strong> 三體審議未達全體一致。' +
+        '「' + question.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])) + '」' +
+        ' 已送入三模型交叉判定；' + rejectedName + ' 回傳 REJECTED，其餘單元暫定 APPROVED。';
+
+      window.setTimeout(() => stage.classList.remove('submitted'), 900);
+    }, 3000);
+  });
+</script>
+</body>
+</html>
