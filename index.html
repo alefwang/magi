@@ -365,18 +365,18 @@
     position:absolute;
     left:0;
     right:0;
-    bottom:1.15%;
-    height:9.0%;
-    padding:0 1.35%;
-    z-index:10;
+    bottom:2.75%;
+    height:10.4%;
+    padding:0 2.35%;
+    z-index:30;
     font-family:"Courier New",monospace;
   }
 
   .field-row{
     height:43%;
     display:grid;
-    grid-template-columns:10.2% 1fr auto;
-    column-gap:.55%;
+    grid-template-columns:10.2% 1fr 150px;
+    column-gap:.8%;
     align-items:center;
     color:#e9971d;
     font-size:clamp(13px,1.2vw,20px);
@@ -407,19 +407,42 @@
   .field-row input::placeholder{color:rgba(255,180,53,.55)}
 
   .submit-btn{
-    height:76%;
-    width:110px;
-    border:2px solid rgba(207,116,18,.9);
-    background:#050200;
+    height:92%;
+    width:150px;
+    min-height:40px;
+    align-self:center;
+    justify-self:end;
+    position:relative;
+    z-index:40;
+    transform:translateY(-2px);
+    border:3px solid rgba(207,116,18,.96);
+    background:#0b0500;
     color:#ff9a16;
     font-family:"Noto Serif CJK TC","Noto Serif TC","Courier New",monospace;
-    font-size:clamp(13px,1.1vw,18px);
+    font-size:clamp(16px,1.55vw,25px);
     font-weight:900;
+    letter-spacing:.12em;
+    padding-left:.12em;
     cursor:pointer;
+    box-shadow:
+      inset 0 0 0 2px rgba(94,43,4,.85),
+      0 0 0 1px rgba(0,0,0,.95),
+      0 0 12px rgba(255,154,22,.35);
   }
 
   .submit-btn:hover,.info-btn:hover{
     filter:brightness(1.18);
+  }
+
+  .submit-btn:hover{
+    box-shadow:
+      inset 0 0 0 2px rgba(125,59,5,.9),
+      0 0 0 1px rgba(0,0,0,.95),
+      0 0 18px rgba(255,154,22,.58);
+  }
+
+  .submit-btn:active{
+    transform:translateY(0);
   }
 
   .summary{
@@ -523,8 +546,8 @@
       border-right:0;
     }
     .system-info .meta{margin-left:2.2rem}
-    .field-row{grid-template-columns:16% 1fr auto}
-    .submit-btn{width:80px}
+    .field-row{grid-template-columns:16% 1fr 112px}
+    .submit-btn{width:112px;min-height:34px;font-size:14px;}
     .panel select{height:22px;font-size:10px;width:min(64%, 210px);}
   }
 </style>
